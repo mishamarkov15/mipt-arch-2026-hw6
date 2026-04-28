@@ -1,20 +1,35 @@
-import asyncio
-from converters import *
+from converters import CurrencyConversionError, CurrencyConverter
 
-def main():    
-    amount = int(input('Введите значение в USD: \n'))
-    
-    converter = UsdRubConverter()
-    print(f"{amount} USD to RUB: {converter.convert_usd_to_rub(amount)}")
-    
-    converter = UsdEurConverter()
-    print(f"{amount} USD to EUR: {converter.convert_usd_to_eur(amount)}")
-    
-    converter = UsdGbpConverter()
-    print(f"{amount} USD to GBP: {converter.convert_usd_to_gbp(amount)}")
-    
-    converter = UsdCnyConverter()
-    print(f"{amount} USD to CNY: {converter.convert_usd_to_cny(amount)}")
+
+TARGET_CURRENCIES = ("RUB", "EUR", "GBP", "CNY")
+
+
+def read_amount() -> float:
+    raw_amount = input("Введите значение в USD:\n")
+
+    try:
+        amount = float(raw_amount)
+    except ValueError as error:
+        raise ValueError("Введите числовое значение") from error
+
+    if amount < 0:
+        raise ValueError("Значение не может быть отрицательным")
+
+    return amount
+
+
+def main():
+    try:
+        amount = read_amount()
+        converter = CurrencyConverter()
+        converted_amounts = converter.convert_many(amount, TARGET_CURRENCIES)
+    except (CurrencyConversionError, ValueError) as error:
+        print(f"Ошибка: {error}")
+        return
+
+    for currency, converted_amount in converted_amounts.items():
+        print(f"{amount:.2f} USD to {currency}: {converted_amount:.2f}")
+
 
 if __name__ == "__main__":
     main()
